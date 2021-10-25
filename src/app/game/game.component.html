@@ -1,1 +1,3 @@
-<p>game works!</p>
+<ng-container *ngIf="game$ | async as game">
+    <app-board [board]="game.board"></app-board>
+</ng-container>

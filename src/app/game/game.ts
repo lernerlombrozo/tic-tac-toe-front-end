@@ -32,17 +32,28 @@ export interface GameOptions {
     size?: number;
 }
 
-export class Game {
+export class Room {
+    public name: string = '';
+    public dimension: 2 | 3 = 2;
+    public size: number = 3;
+
+    constructor(gameOptions: GameOptions){
+        const { name, dimension, size } = gameOptions;
+        this.name = name;
+        this.dimension = dimension;
+        this.size = !size || size < 3 ? 3 : size;
+    }
+}
+
+export class Game extends Room {
     public winner: Players | undefined;
-    public name?: string;
     public readonly players : Players[] = [Players.P1];
     public readonly currentTurn = Players.P1;
     public board: Board2D | Board3D = [];
 
     constructor(gameOptions: GameOptions){
-        const { name, dimension, size } = gameOptions;
-        this.name = name;
-        this.board = boardFactory(dimension, size);
+        super(gameOptions);
+        this.board = boardFactory(this.dimension, this.size);
     }
 
     public playerJoin(): void {
