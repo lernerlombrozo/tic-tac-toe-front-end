@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { delay, tap } from 'rxjs/operators';
 import { Game, GameOptions } from './game';
 
 @Injectable({
@@ -35,7 +35,7 @@ export class GameService {
 
   public loadGame(name: string): Observable<Game> {
     // TODO load actual new game
-    return of(new Game({name, dimension: 3})).pipe(tap((game)=>{
+    return of(new Game({name, dimension: 3})).pipe(delay(700), tap((game)=>{
       this.updateGame(game);
     }));
   }

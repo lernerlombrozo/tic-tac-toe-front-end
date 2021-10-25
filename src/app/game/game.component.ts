@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { take, tap } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { Game } from './game';
 import { GameService } from './game.service';
 
@@ -10,15 +10,32 @@ import { GameService } from './game.service';
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss']
 })
-export class GameComponent {
+export class GameComponent implements OnInit, OnDestroy{
 
-  public game$: Observable<Game | undefined> = this.gameService.game$.pipe(tap((game)=>{
-    if(!game){
-      this.fetchGameFromParams();
-    }
-  }));
+  public game : Game | undefined;
+
+  private readonly subscriptions: Subscription[] = [];
 
   constructor(private readonly gameService: GameService, private readonly route: ActivatedRoute, private readonly router: Router) { }
+
+
+  public ngOnInit(){
+    const subscription = this.gameService.game$.pipe(tap((game)=>{
+      console.log(game);
+      if(!game){
+        this.fetchGameFromParams();
+      }
+    })).subscribe((game)=>{
+      this.game = game;
+    })
+  }
+
+  public ngOnDestroy(){
+    this.subscriptions.forEach((subscription)=>{
+      subscription.unsubscribe();
+    })
+
+  }  
 
   private fetchGameFromParams() : void {
     const gameName = this.route.snapshot.paramMap.get('game-name');
@@ -26,6 +43,7 @@ export class GameComponent {
       this.router.navigate(['..'])
       return;
     }
-    this.gameService.loadGame(gameName).subscribe(()=>{});
+    this.gameService.loadGame(gameName).subscribe((game)=>{
+    });
   }
 }

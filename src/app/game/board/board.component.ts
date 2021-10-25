@@ -1,6 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { Color } from 'src/app/enums/color.enum';
 import * as THREE from "three";
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { Board2D, Board3D } from '../game';
 
 @Component({
@@ -8,34 +9,37 @@ import { Board2D, Board3D } from '../game';
   templateUrl: './board.component.html',
   styleUrls: ['./board.component.scss']
 })
-export class BoardComponent implements OnInit {
+export class BoardComponent implements AfterViewInit {
   @Input() board: Board2D | Board3D | undefined;
+  @ViewChild('canvas') private readonly canvasRef!: ElementRef<HTMLCanvasElement>;
 
-  ngOnInit(): void {
+  constructor(){}
+
+  ngAfterViewInit(): void {
+    this.renderer = new THREE.WebGLRenderer({
+      canvas: this.canvasRef.nativeElement
+    });
     this.setScene();
     this.setCamera();
-    this.addToScene(this.circle, this.line);
+    this.addToScene(this.circle, this.lines);
     this.animate();
   }
 
   private readonly scene = new THREE.Scene();
-  private readonly camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 500 );
-  // private readonly camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-  private readonly renderer = new THREE.WebGLRenderer();
+  private readonly camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 500 );
+  private renderer!: THREE.WebGLRenderer;
   private readonly circle = this.createCircle(Color.Blue);
-  private readonly line = this.createLine(Color.Blue);
+  private readonly lines = this.createLine(Color.Blue);
+  private controls!: OrbitControls;
 
   private setScene(){
     this.renderer.setPixelRatio( window.devicePixelRatio );
     this.renderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.appendChild( this.renderer.domElement );
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement)
   }
 
   private setCamera(){
-    // this.camera.position.set( 0, 0, 5 );
-    // this.camera.lookAt( 0, 0, 0 );
     this.camera.position.set( 0, 0, 100 );
-    this.camera.lookAt( 0, 0, 0 );
   }
 
   private createCircle(color: Color) : THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial> {
@@ -62,10 +66,17 @@ export class BoardComponent implements OnInit {
 
   private animate() {
     setInterval(()=>{
-      this.circle.rotation.x += 0.1;
-      this.circle.rotation.y += 0.1;
+      this.rotateItems(this.circle);
+      this.controls.update();
       this.renderer.render( this.scene, this.camera );
     }, 100)
+  }
+
+  private rotateItems(...items: THREE.Mesh[]) {
+    items.forEach((item)=>{
+      item.rotation.x += 0.1;
+      item.rotation.y += 0.1;
+    })
   }
 
 }
