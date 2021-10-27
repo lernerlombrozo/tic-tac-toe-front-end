@@ -21,6 +21,7 @@ export class BoardComponent implements AfterViewInit {
     });
     this.setScene();
     this.setCamera();
+    this.setRayCaster();
     this.addToScene(this.circle, this.lines);
     this.animate();
   }
@@ -31,15 +32,23 @@ export class BoardComponent implements AfterViewInit {
   private readonly circle = this.createCircle(Color.Blue);
   private readonly lines = this.createLine(Color.Blue);
   private controls!: OrbitControls;
+  private readonly raycaster = new THREE.Raycaster();
+  private readonly mouse = new THREE.Vector2();
 
   private setScene(){
     this.renderer.setPixelRatio( window.devicePixelRatio );
     this.renderer.setSize( window.innerWidth, window.innerHeight );
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    window.addEventListener('mousemove', this.onMouseMove, false );
+    window.addEventListener('click', this.onClick, false );
   }
 
   private setCamera(){
     this.camera.position.set( 0, 0, 100 );
+  }
+
+  private setRayCaster(){
+    this.raycaster.setFromCamera(this.mouse, this.camera);
   }
 
   private createCircle(color: Color) : THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial> {
@@ -68,6 +77,11 @@ export class BoardComponent implements AfterViewInit {
     setInterval(()=>{
       this.rotateItems(this.circle);
       this.controls.update();
+      const intersects = this.raycaster.intersectObjects( this.scene.children );
+      for ( let i = 0; i < intersects.length; i ++ ) {
+        // console.log(intersects[i]);
+        // intersects[ i ].object.material.color.set( 0xff0000 );
+      }
       this.renderer.render( this.scene, this.camera );
     }, 100)
   }
@@ -77,6 +91,17 @@ export class BoardComponent implements AfterViewInit {
       item.rotation.x += 0.1;
       item.rotation.y += 0.1;
     })
+  }
+
+  private onMouseMove(event: MouseEvent): void {  
+    // this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    // this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+  }
+
+  private onClick(event: MouseEvent): void { 
+    console.log(event); 
+    // this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    // this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
   }
 
 }
