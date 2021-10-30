@@ -1,9 +1,16 @@
+import { BoxGeometry, Line, Material, WireframeGeometry } from "three";
+
 export enum Players {
     P1,
     P2
 }
 
 type Board1D = Array<0 | 1 | 2>;
+export type MapTypes = Line<WireframeGeometry<BoxGeometry>, Material>;
+export type BoardMap1D = Array<MapTypes>;
+export type BoardMap2D = BoardMap1D[];
+export type BoardMap3D = BoardMap2D[];
+
 export type Board2D = Board1D[];
 export type Board3D = Board2D[];
 
