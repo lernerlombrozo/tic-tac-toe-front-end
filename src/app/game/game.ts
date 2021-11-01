@@ -1,36 +1,34 @@
-import { BoxGeometry, Line, Material, WireframeGeometry } from "three";
-
 export enum Players {
-    P1,
+    P1 = 1,
     P2
 }
 
-export type Board1D = Array<0 | 1 | 2>;
-export type MapTypes = Line<WireframeGeometry<BoxGeometry>, Material> | THREE.Mesh<THREE.TorusGeometry | THREE.SphereGeometry, THREE.MeshBasicMaterial>
-export type BoardMap1D = Array<MapTypes>;
-export type BoardMap2D = BoardMap1D[];
-export type BoardMap3D = BoardMap2D[];
-
+export type Board1D = Array<0 | Players.P1 | Players.P2>;
 export type Board2D = Board1D[];
 export type Board3D = Board2D[];
 
 export const boardFactory = (dimension: 2 | 3, size = 3): Board2D | Board3D  => {
-    const row: Board1D = [];
-    for (let i = 0; i < size; i++){
-        row.push(0);
-    }
-    const board2D: Board2D = [];
-    for(let i = 0; i < size; i++){
-        board2D.push(row);
-    }
+    const board: Board2D | Board3D = [];
     if(dimension === 2){
-        return board2D;
-    }
-    const board3D: Board3D = [];
-    for(let i = 0; i < size; i++){
-        board3D.push(board2D);
+        for(let x=0; x < size; x++){
+            board.push([])
+          for(let y=0; y < size; y++){
+            (board[x] as Board1D).push(0);
+          }
+        }
     } 
-    return board3D;
+    else {
+        for(let x=0; x < size; x++){
+            board.push([])
+            for(let y=0; y < size; y++){
+                (board[x] as Board2D).push([])
+                for(let z=0; z < size; z++){
+                    (board[x][y] as Board1D).push(0);
+                }
+            }
+        }
+    }
+    return board;
 }
 
 export interface GameOptions {

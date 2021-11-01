@@ -3,13 +3,15 @@ import { Color } from 'src/app/enums/color.enum';
 import * as THREE from "three";
 import { BoxGeometry, Line, Material, WireframeGeometry } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { Board2D, Board3D, boardFactory, MapTypes, Players } from '../game';
+import { Board2D, Board3D, boardFactory, Players } from '../game';
 
 interface Point {
   x: number,
   y: number,
   z: number
 }
+
+export type Shape = Line<WireframeGeometry<BoxGeometry>, Material> | THREE.Mesh<THREE.TorusGeometry | THREE.SphereGeometry, THREE.MeshBasicMaterial>
 
 @Component({
   selector: 'app-board',
@@ -24,8 +26,8 @@ export class BoardComponent implements AfterViewInit {
   private readonly GRID_SIZE = 10;
   private readonly boardSize = this.getBoardSize(this.board);
   private readonly boardDimension = this.getBoardDimension(this.board) as 2 | 3;
-  private readonly boardMap = new Map<MapTypes, [number, number, number]>();
-  private readonly reverseMap = new Map<[number, number, number], MapTypes>();
+  private readonly boardMap = new Map<Shape, [number, number, number]>();
+  private readonly reverseMap = new Map<[number, number, number], Shape>();
 
   getBoardSize(board: any[]): number {
     return board.length;
@@ -238,7 +240,7 @@ export class BoardComponent implements AfterViewInit {
     }
   }
 
-  private setShapePosition(shape: MapTypes, boardLength: number, x: number, y: number, z = 0){
+  private setShapePosition(shape: Shape, boardLength: number, x: number, y: number, z = 0){
       shape.position.x = this.transformCoordinateForShape(x, boardLength),
       shape.position.y = this.transformCoordinateForShape(y, boardLength),
       shape.position.z = this.transformCoordinateForShape(z, boardLength)
@@ -267,10 +269,11 @@ export class BoardComponent implements AfterViewInit {
       const cubeIndex = this.boardMap.get(this.lastHoveredCube);
       if(cubeIndex){
         const [x,y,z] = cubeIndex;
+        console.log(x,y,z);
         if(this.boardDimension === 2){
-          (this.board as Board2D)[x][y] = 1;
+          (this.board as Board2D)[x][y] = this.playerTurn;
         } else {
-          (this.board as Board3D)[x][y][z] = 1;
+          (this.board as Board3D)[x][y][z] = this.playerTurn;
         }
         this.scene.remove(this.lastHoveredCube);
         this.lastHoveredCube = undefined;
@@ -306,6 +309,7 @@ export class BoardComponent implements AfterViewInit {
   }
 
   private changePlayerTurn(){
+    console.log(this.board);
     this.playerTurn = this.playerTurn === Players.P1 ? Players.P2 : Players.P1;
   }
 
