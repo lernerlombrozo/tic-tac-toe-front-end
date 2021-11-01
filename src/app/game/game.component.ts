@@ -21,13 +21,13 @@ export class GameComponent implements OnInit, OnDestroy{
 
   public ngOnInit(){
     const subscription = this.gameService.game$.pipe(tap((game)=>{
-      console.log(game);
       if(!game){
         this.fetchGameFromParams();
       }
     })).subscribe((game)=>{
       this.game = game;
     })
+    this.subscriptions.push(subscription);
   }
 
   public ngOnDestroy(){

@@ -5,8 +5,8 @@ export enum Players {
     P2
 }
 
-type Board1D = Array<0 | 1 | 2>;
-export type MapTypes = Line<WireframeGeometry<BoxGeometry>, Material>;
+export type Board1D = Array<0 | 1 | 2>;
+export type MapTypes = Line<WireframeGeometry<BoxGeometry>, Material> | THREE.Mesh<THREE.TorusGeometry | THREE.SphereGeometry, THREE.MeshBasicMaterial>
 export type BoardMap1D = Array<MapTypes>;
 export type BoardMap2D = BoardMap1D[];
 export type BoardMap3D = BoardMap2D[];
