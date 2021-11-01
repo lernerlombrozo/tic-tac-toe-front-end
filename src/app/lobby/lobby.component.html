@@ -6,7 +6,7 @@
         </a>
 
         <ul class="nav nav-pills">
-        <li class="nav-item"><a (click)="createNewGame()" class="nav-link active" aria-current="page">New Game</a></li>
+        <li class="nav-item"><a (click)="toggleModal()" class="nav-link active mx-3" aria-current="page">New Game</a></li>
         </ul>
     </header>
 </div>
@@ -19,3 +19,4 @@
         </div>
     </li>
 </ul>
+<app-create-modal *ngIf="isModalOpen" (close)="toggleModal()" (startGame)="createNewGame($event)"></app-create-modal>

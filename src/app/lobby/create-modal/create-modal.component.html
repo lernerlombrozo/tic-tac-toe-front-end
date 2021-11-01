@@ -1,0 +1,35 @@
+<div class="modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Create game</h5>
+            <button type="button" class="close" (click)="closeModal()">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form #form="ngForm">
+                <div class="form-group">
+                  <label>Dimension</label>
+                  <select class="form-control" name="dimension" [(ngModel)]="gameOptions.dimension">
+                    <option *ngFor="let dimension of dimensions" [ngValue]="dimension">{{dimension}}</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Size (sorry, I only created the rules for 3X3 and 3X3X3 games)</label>
+                  <select class="form-control" name="size" [(ngModel)]="gameOptions.size">
+                    <option>3</option>
+                  </select>               
+                 </div>
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                  <input type="text" required class="form-control" name="name" #name="ngModel" [ngClass]="{invalid: name.invalid && (name.dirty || name.touched)}" [(ngModel)]="gameOptions.name">
+                </div>
+              </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" (click)="createGame()" [disabled]="!form.valid">Create Game</button>
+        </div>
+        </div>
+    </div>
+</div>

@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { Room } from '../game/game';
+import { switchMap } from 'rxjs/operators';
+import { GameOptions, Room } from '../game/game';
 import { GameService } from '../game/game.service';
 import { RoomsService } from '../rooms.service';
 
@@ -16,6 +17,12 @@ export class LobbyComponent {
 
   public rooms$: Observable<Room[]> | undefined;
 
+  public isModalOpen = false;
+
+  public toggleModal(){
+    this.isModalOpen = !this.isModalOpen;
+  }
+
   ngOnInit(): void {
     this.rooms$ = this.fetchRooms();
   }
@@ -24,8 +31,10 @@ export class LobbyComponent {
     return this.roomsService.fetchRooms();
   }
 
-  public createNewGame() {
-    this.gameService.createGame({dimension:3, name: 'new game'}).subscribe((game)=>{
+  public createNewGame(gameOptions:GameOptions) {
+    this.roomsService.createRoom(gameOptions)
+    .pipe(switchMap(()=>this.gameService.createGame(gameOptions)))
+    .subscribe((game)=>{
       this.goToGame(game.name);
     });
   }
