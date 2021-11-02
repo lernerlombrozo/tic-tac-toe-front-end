@@ -4,7 +4,11 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:80/api'
+  apiUrl: 'http://localhost:80/api',
+  pusher: {
+    key: 'e3a22057b0805876c565',
+    cluster: 'us3'
+  }
 };
 
 /*

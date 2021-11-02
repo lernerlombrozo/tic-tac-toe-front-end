@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { Color } from 'src/app/enums/color.enum';
 import * as THREE from "three";
 import { BoxGeometry, Line, Material, WireframeGeometry } from 'three';
@@ -22,6 +22,7 @@ export class BoardComponent implements AfterViewInit {
   @Input() board: Board2D | Board3D = boardFactory(3, 3);
   @Input() player = Players.P1;
   @Input() playerTurn = Players.P1;
+  @Output() move = new EventEmitter<[number, number]|[number, number, number]>()
   @ViewChild('canvas') private readonly canvasRef!: ElementRef<HTMLCanvasElement>;
   private readonly GRID_SIZE = 10;
   private readonly boardSize = this.getBoardSize(this.board);
@@ -272,8 +273,10 @@ export class BoardComponent implements AfterViewInit {
         console.log(x,y,z);
         if(this.boardDimension === 2){
           (this.board as Board2D)[x][y] = this.playerTurn;
+          this.move.emit([x,y]);
         } else {
           (this.board as Board3D)[x][y][z] = this.playerTurn;
+          this.move.emit([x,y,z]);
         }
         this.scene.remove(this.lastHoveredCube);
         this.lastHoveredCube = undefined;

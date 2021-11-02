@@ -43,7 +43,14 @@ export class GameService {
     return this.httpClient.post<Game>(`${environment.apiUrl}/games/join`, game);
   }
 
-  public loadGame(id: string): Observable<Game> {
+  public move(move: [number, number] | [number, number, number], player: string): Observable<Game>{
+    const game = {
+      move, player, id: this.currentGame?.id
+    }
+    return this.httpClient.post<Game>(`${environment.apiUrl}/games/move`, game);
+  }
+
+  public loadGame(id: number): Observable<Game> {
     // TODO load actual new game
     return this.httpClient.get<Game>(`${environment.apiUrl}/games/${id}`);
   }
