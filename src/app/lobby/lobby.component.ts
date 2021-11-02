@@ -32,7 +32,6 @@ export class LobbyComponent {
 
   public createNewGame(gameOptions:GameOptions) {
     if(!this.appService.anonymousId){
-      console.log('issue with browser or app not initialized');
       return;
     }
     const game = new Game(this.appService.anonymousId, gameOptions);
@@ -41,7 +40,6 @@ export class LobbyComponent {
     this.gameService.createGame(game)
     .subscribe((game)=>{
       if(!game.id){
-        console.log('did not get game id');
         return;
       }
       this.goToGame(game.id);

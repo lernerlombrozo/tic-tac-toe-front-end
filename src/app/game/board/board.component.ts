@@ -1,9 +1,12 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, OnDestroy, ViewChild } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { subscribeOn } from 'rxjs/operators';
 import { Color } from 'src/app/enums/color.enum';
 import * as THREE from "three";
 import { BoxGeometry, Line, Material, WireframeGeometry } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { Board2D, Board3D, boardFactory, Players } from '../game';
+import { GameService } from '../game.service';
 
 interface Point {
   x: number,
@@ -18,7 +21,7 @@ export type Shape = Line<WireframeGeometry<BoxGeometry>, Material> | THREE.Mesh<
   templateUrl: './board.component.html',
   styleUrls: ['./board.component.scss']
 })
-export class BoardComponent implements AfterViewInit {
+export class BoardComponent implements AfterViewInit, OnDestroy {
   @Input() board: Board2D | Board3D = boardFactory(3, 3);
   @Input() player = Players.P1;
   @Input() playerTurn = Players.P1;
@@ -29,6 +32,15 @@ export class BoardComponent implements AfterViewInit {
   private readonly boardDimension = this.getBoardDimension(this.board) as 2 | 3;
   private readonly boardMap = new Map<Shape, [number, number, number]>();
   private readonly reverseMap = new Map<[number, number, number], Shape>();
+  private readonly subscriptions: Subscription[] = [];
+
+  constructor(private readonly gameService: GameService){}
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach((subscription)=>{
+      subscription.unsubscribe()
+    })
+  }
 
   getBoardSize(board: any[]): number {
     return board.length;
@@ -58,7 +70,12 @@ export class BoardComponent implements AfterViewInit {
     this.setScene();
     this.setCamera();
     this.addToScene(...this.lines);
-    this.addShapes(this.board, this.boardDimension);
+    this.gameService.game$.subscribe((game)=>{
+      if(game?.board){
+        this.board = game.board;
+      }
+      this.addShapes(this.board, this.boardDimension);
+    })
     this.animate();
   }
 
@@ -219,26 +236,37 @@ export class BoardComponent implements AfterViewInit {
     if(dimension === 2){
       for(let x=0; x < board.length; x++){
         for(let y=0; y < board.length; y++){
-          const cube = this.createCube(Color.Green);
-          this.setShapePosition(cube, board.length, x, y);
-          this.addToScene(cube);
-          this.boardMap.set(cube, [x,y,0]);
-          this.reverseMap.set([x,y,0], cube);
+          const element = (board as Board2D)[x][y];
+          console.log(board);
+          this.createShape(element, board.length, x, y, 0);
         }
       }
     } else {
       for(let x=0; x < board.length; x++){
         for(let y=0; y < board.length; y++){
           for(let z=0; z < board.length; z++){
-            const cube = this.createCube(Color.Green);
-            this.setShapePosition(cube, board.length, x, y,z);
-            this.addToScene(cube);
-            this.boardMap.set(cube, [x,y,z]);
-            this.reverseMap.set([x,y,z], cube);
+            const element = (board as Board3D)[x][y][z];
+            console.log((board as Board3D)[0]);
+            this.createShape(element, board.length, x, y, z);
           }
         }
       }
     }
+  }
+
+  private createShape(element: 0 | Players, boardLength: number, x: number, y: number, z = 0){
+    let shape;
+    if(element === 0){
+      shape = this.createCube(Color.Green);
+    } else if(element === 1){
+      shape = this.createTorus(Color.Pink);
+    } else {
+      shape = this.createSphere(Color.Blue); 
+    }
+    this.setShapePosition(shape, boardLength, x, y);
+    this.addToScene(shape);
+    this.boardMap.set(shape, [x,y,z]);
+    this.reverseMap.set([x,y,z], shape);
   }
 
   private setShapePosition(shape: Shape, boardLength: number, x: number, y: number, z = 0){
@@ -270,7 +298,6 @@ export class BoardComponent implements AfterViewInit {
       const cubeIndex = this.boardMap.get(this.lastHoveredCube);
       if(cubeIndex){
         const [x,y,z] = cubeIndex;
-        console.log(x,y,z);
         if(this.boardDimension === 2){
           (this.board as Board2D)[x][y] = this.playerTurn;
           this.move.emit([x,y]);
@@ -280,19 +307,18 @@ export class BoardComponent implements AfterViewInit {
         }
         this.scene.remove(this.lastHoveredCube);
         this.lastHoveredCube = undefined;
-        this.addPlayersChip(x, y, z);
-        this.changePlayerTurn();
+        // this.addPlayersChip(x, y, z);
       }
     }
   }
 
-  private addPlayersChip(x: number, y:number, z=0){
-    if(this.playerTurn === Players.P2){
-      this.addSphere(x,y,z);
-    } else {
-      this.addTorus(x,y,z);
-    }
-  }
+  // private addPlayersChip(x: number, y:number, z=0){
+  //   if(this.playerTurn === Players.P2){
+  //     this.addSphere(x,y,z);
+  //   } else {
+  //     this.addTorus(x,y,z);
+  //   }
+  // }
 
   addSphere(x: number, y: number, z = 0){
     const sphere = this.createSphere(Color.Blue);
@@ -310,10 +336,4 @@ export class BoardComponent implements AfterViewInit {
     this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
     this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
   }
-
-  private changePlayerTurn(){
-    console.log(this.board);
-    this.playerTurn = this.playerTurn === Players.P1 ? Players.P2 : Players.P1;
-  }
-
 }

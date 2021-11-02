@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Game } from './game';
 
@@ -52,6 +53,8 @@ export class GameService {
 
   public loadGame(id: number): Observable<Game> {
     // TODO load actual new game
-    return this.httpClient.get<Game>(`${environment.apiUrl}/games/${id}`);
+    return this.httpClient.get<Game>(`${environment.apiUrl}/games/${id}`).pipe(tap((game)=>{
+      this.updateGame(game)
+    }));
   }
 }

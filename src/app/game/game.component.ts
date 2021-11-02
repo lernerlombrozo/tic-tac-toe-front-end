@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { tap } from 'rxjs/operators';
 import { AppService } from '../app.service';
 import { MockSocketsService } from '../mock-sockets.service';
 import { Game } from './game';
@@ -22,23 +21,18 @@ export class GameComponent implements OnInit, OnDestroy{
 
 
   public ngOnInit(){
-    const subscription = this.gameService.game$.pipe(tap((game)=>{
-      if(!game){
-        this.fetchGameFromParams();
-      }
-    })).subscribe((game)=>{
-      if(game){
-        this.setGame(game);
-      }
-    })
-    this.subscriptions.push(subscription);
+    const game = this.gameService.currentGame;
+    if(!game?.id){
+      this.fetchGameFromParams();
+      return;
+    }
+    this.setGameListener(game.id);
   }
 
   public ngOnDestroy(){
     this.subscriptions.forEach((subscription)=>{
       subscription.unsubscribe();
     })
-
   }  
 
   private fetchGameFromParams() : void {
@@ -70,7 +64,6 @@ export class GameComponent implements OnInit, OnDestroy{
     if(!this.appService.anonymousId){
       return;
     }
-    console.log('moving', position);
     this.gameService.move(position, this.appService.anonymousId).subscribe((res)=>{
       console.log(res);
     });
