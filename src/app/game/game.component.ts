@@ -4,7 +4,6 @@ import { Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { AppService } from '../app.service';
 import { MockSocketsService } from '../mock-sockets.service';
-import { SocketsService } from '../sockets.service';
 import { Game } from './game';
 import { GameService } from './game.service';
 
@@ -43,12 +42,12 @@ export class GameComponent implements OnInit, OnDestroy{
   }  
 
   private fetchGameFromParams() : void {
-    const gameName = this.route.snapshot.paramMap.get('game-name');
+    const gameName = this.route.snapshot.paramMap.get('game-id');
     if(!gameName){
       this.router.navigate(['..'])
       return;
     }
-    this.gameService.loadGame(gameName).subscribe((game)=>{
+    this.gameService.loadGame(+gameName).subscribe((game)=>{
       this.setGame(game);
     });
   }
@@ -71,6 +70,9 @@ export class GameComponent implements OnInit, OnDestroy{
     if(!this.appService.anonymousId){
       return;
     }
-    this.gameService.move(position, this.appService.anonymousId)
+    console.log('moving', position);
+    this.gameService.move(position, this.appService.anonymousId).subscribe((res)=>{
+      console.log(res);
+    });
   }
 }
