@@ -54,6 +54,7 @@ export class GameService {
   public loadGame(id: number): Observable<Game> {
     // TODO load actual new game
     return this.httpClient.get<Game>(`${environment.apiUrl}/games/${id}`).pipe(tap((game)=>{
+      game.board = JSON.parse(game.board as never as string);
       this.updateGame(game)
     }));
   }

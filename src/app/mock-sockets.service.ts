@@ -14,7 +14,7 @@ export class MockSocketsService {
 
   // breaking single responsibility principle, should instead use http service or pass in a callback function
   public listen(gameId: number): Observable<Game>{
-    return interval(4000).pipe(switchMap((x)=>{
+    return interval(2000).pipe(switchMap((x)=>{
       return this.gameService.loadGame(gameId);
     }))
   }
