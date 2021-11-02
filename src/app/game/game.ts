@@ -37,35 +37,34 @@ export interface GameOptions {
     size?: number;
 }
 
-export class Room {
-    public name: string = '';
-    public dimension: 2 | 3 = 2;
-    public size: number = 3;
+export class Game {
+    public readonly name: string | undefined;
+    public readonly dimension:  2 | 3 = 3;
+    public readonly size: number; 
+    public readonly player1: string | undefined;
+    private _player2: string | undefined;
+    public currentTurn = Players.P1;
+    public winner: string | undefined;
+    public board?: Board2D | Board3D = [];
+    public readonly id?: number
 
-    constructor(gameOptions: GameOptions){
-        const { name, dimension, size } = gameOptions;
-        this.name = name;
-        this.dimension = dimension;
-        this.size = !size || size < 3 ? 3 : size;
-    }
-}
-
-export class Game extends Room {
-    public winner: Players | undefined;
-    public readonly players : Players[] = [Players.P1];
-    public readonly currentTurn = Players.P1;
-    public board: Board2D | Board3D = [];
-
-    constructor(gameOptions: GameOptions){
-        super(gameOptions);
-        this.board = boardFactory(this.dimension, this.size);
+    constructor(player1:string, gameOptions: GameOptions){
+        this.player1 = player1;
+        this.name = gameOptions.name;
+        this.dimension = gameOptions.dimension;
+        this.size = gameOptions.size || 3;
+        this.board = boardFactory(gameOptions.dimension, gameOptions.size);
     }
 
-    public playerJoin(): void {
-        if(this.players.length === 2){
+    public set player2(playerId: string | undefined) {
+        if(this._player2 || !playerId){
             return;
         }
-        this.players.push(Players.P2);
+        this._player2 = playerId;
+    }
+
+    public get player2(): string | undefined{
+        return this._player2;
     }
 
 }

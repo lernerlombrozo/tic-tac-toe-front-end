@@ -11,11 +11,11 @@
     </header>
 </div>
 <ul class="list-group">
-    <li class="list-group-item d-flex justify-content-between align-items-start" *ngFor="let room of rooms$ | async; index as i" (click)="goToGame(room.name)">
+    <li class="list-group-item d-flex justify-content-between align-items-start" *ngFor="let game of games$ | async; index as i" (click)="joinGameById(game.id)">
         <div class="ms-2 me-auto">
-        <div class="fw-bold">{{room.name}}</div>
-            <div>Size: <strong>{{room.size}}</strong></div>
-            <div>Dimension: <strong>{{room.dimension}}</strong></div> 
+        <div class="fw-bold">{{game.name}}</div>
+            <div>Size: <strong>{{game.size}}</strong></div>
+            <div>Dimension: <strong>{{game.dimension}}</strong></div> 
         </div>
     </li>
 </ul>

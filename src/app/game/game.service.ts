@@ -1,7 +1,8 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { delay, tap } from 'rxjs/operators';
-import { Game, GameOptions } from './game';
+import { environment } from 'src/environments/environment';
+import { Game } from './game';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +17,8 @@ export class GameService {
 
   private readonly game = new BehaviorSubject<Game | undefined>(this.currentGame);
 
+  constructor(private readonly httpClient: HttpClient){}
+
   updateGame(game: Game): void {
     this.currentGame = game;
     this.game.next(this.currentGame);
@@ -26,17 +29,22 @@ export class GameService {
     this.game.next(this.currentGame);
   }
 
-  public createGame(gameOptions: GameOptions): Observable<Game> {
-    // TODO create actual new game
-    return of(new Game(gameOptions)).pipe(tap((game)=>{
-      this.updateGame(game);
-    }));
+  public fetchGames(): Observable<Game[]> {
+    return this.httpClient.get<Game[]>(`${environment.apiUrl}/games`);
+
   }
 
-  public loadGame(name: string): Observable<Game> {
+  public createGame(game: Game): Observable<Game> {
+    return this.httpClient.post<Game>(`${environment.apiUrl}/games`, game);
+
+  };
+
+  public joinGameById(game: {id: number, player2: string}): Observable<Game>{
+    return this.httpClient.post<Game>(`${environment.apiUrl}/games/join`, game);
+  }
+
+  public loadGame(id: string): Observable<Game> {
     // TODO load actual new game
-    return of(new Game({name, dimension: 3})).pipe(delay(700), tap((game)=>{
-      this.updateGame(game);
-    }));
+    return this.httpClient.get<Game>(`${environment.apiUrl}/games/${id}`);
   }
 }
